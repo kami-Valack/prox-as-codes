@@ -28,8 +28,10 @@ def flow_to_record(
     parsed = urlparse(req.pretty_url)
     query = parsed.query or ""
     duration_ms: float | None = None
-    if flow.request.timestamp and flow.response and flow.response.timestamp:
-        duration_ms = (flow.response.timestamp - flow.request.timestamp) * 1000.0
+    request_started = getattr(req, "timestamp_start", None)
+    response_ended = getattr(res, "timestamp_end", None) if res else None
+    if request_started is not None and response_ended is not None:
+        duration_ms = (response_ended - request_started) * 1000.0
 
     return OriginalRecord(
         id=uuid4(),

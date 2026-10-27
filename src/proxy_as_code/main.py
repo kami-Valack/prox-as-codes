@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import socket
 from pathlib import Path
 from uuid import UUID
@@ -37,6 +38,10 @@ def serve(
     config: Path = typer.Option(Path("config.yaml"), help="Path to config.yaml"),
 ) -> None:
     """Start mitmproxy and the REST API."""
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+    )
     ctx = _ctx_from_opts(config)
     api = create_api(ctx)
     proxy = ctx.config.proxy

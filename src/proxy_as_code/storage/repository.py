@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import sqlite3
 from datetime import datetime
 from pathlib import Path
@@ -16,6 +17,8 @@ from proxy_as_code.capture.models import (
 )
 from proxy_as_code.storage import blobs
 from proxy_as_code.storage.database import connect, init_db
+
+logger = logging.getLogger(__name__)
 
 
 def _headers_to_json(pairs: list[HeaderPair]) -> str:
@@ -35,6 +38,7 @@ class TrafficRepository:
         self._blobs_dir.mkdir(parents=True, exist_ok=True)
         self._conn = connect(db_path)
         init_db(self._conn)
+        logger.info("Traffic database initialized: path=%s", db_path)
 
     @property
     def connection(self) -> sqlite3.Connection:
@@ -53,6 +57,11 @@ class TrafficRepository:
         return blobs.read_blob(self._blobs_dir, ref)
 
     def insert_transaction(self, record: OriginalRecord) -> None:
+        logger.info(
+            "Executing transaction insert: transaction_id=%s host=%s",
+            record.id,
+            record.host,
+        )
         self._conn.execute(
             """
             INSERT INTO transactions (
@@ -80,6 +89,7 @@ class TrafficRepository:
             ),
         )
         self._conn.commit()
+        logger.info("Transaction insert committed: transaction_id=%s", record.id)
 
     def insert_artifact(self, artifact: GeneratedArtifact) -> None:
         self._conn.execute(
