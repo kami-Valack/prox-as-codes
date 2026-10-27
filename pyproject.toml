@@ -1,0 +1,39 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "proxy-as-code"
+version = "0.1.0"
+description = "HTTP capture, compilation, and controlled replay for pentest workflows"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "mitmproxy>=10.0",
+    "httpx>=0.27",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+    "pyyaml>=6.0",
+    "typer>=0.12",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+]
+agent = [
+    "mcp>=1.2",
+]
+
+[project.scripts]
+proxy-as-code = "proxy_as_code.main:app"
+
+[tool.hatch.build]
+sources = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

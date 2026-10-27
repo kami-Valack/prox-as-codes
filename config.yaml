@@ -1,0 +1,41 @@
+# host 0.0.0.0: browser no Windows liga via IP do WSL (hostname -I), não só 127.0.0.1
+proxy:
+  host: "0.0.0.0"
+  port: 8081
+
+capture:
+  include_domains:
+    - "bolt.eu"
+    - "*.bolt.eu"
+    - "boltsvc.net"
+    - "*.boltsvc.net"
+  exclude_domains:
+    - "analytics.example.test"
+  store_bodies: true
+
+replay:
+  require_approval: true
+  # Token for agents: MCP replay_request(approval_token=...) or header X-Replay-Approval
+  approval_token: "change-me-in-lab-only"
+  allowed_domains:
+    - "bolt.eu"
+    - "*.bolt.eu"
+    - "boltsvc.net"
+    - "*.boltsvc.net"
+  timeout_seconds: 15.0
+  rate_limit_per_minute: 30
+
+storage:
+  database_path: "data/proxy_as_code.db"
+  blobs_dir: "data/blobs"
+
+api:
+  host: "127.0.0.1"
+  port: 8090
+
+compiler:
+  version: "0.1.0"
+  redact_sensitive_headers: true
+
+ai:
+  max_body_bytes: 524288
