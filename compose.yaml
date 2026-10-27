@@ -1,0 +1,19 @@
+services:
+  proxy-as-code:
+    build: .
+    ports:
+      - "127.0.0.1:8080:8080"
+      - "127.0.0.1:8090:8090"
+    environment:
+      PROXY_AS_CODE_PROXY__HOST: "0.0.0.0"
+      PROXY_AS_CODE_API__HOST: "0.0.0.0"
+      PROXY_AS_CODE_STORAGE__DATABASE_PATH: "/app/data/proxy_as_code.db"
+      PROXY_AS_CODE_STORAGE__BLOBS_DIR: "/app/data/blobs"
+      PROXY_AS_CODE_REPLAY__REQUIRE_APPROVAL: "true"
+      PROXY_AS_CODE_CAPTURE__INCLUDE_DOMAINS: "${PROXY_AS_CODE_CAPTURE__INCLUDE_DOMAINS:-[]}"
+      PROXY_AS_CODE_REPLAY__ALLOWED_DOMAINS: "${PROXY_AS_CODE_REPLAY__ALLOWED_DOMAINS:-[]}"
+    volumes:
+      - proxy-data:/app/data
+
+volumes:
+  proxy-data:

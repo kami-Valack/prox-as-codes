@@ -10,8 +10,12 @@ HTTP/HTTPS proxy that captures traffic, stores faithful originals, compiles reus
 ## Install
 
 ```bash
-pip install -e ".[dev]"
+uv sync --locked --extra dev
 ```
+
+The committed [`uv.lock`](uv.lock) pins the full dependency graph. To install
+without uv, use `pip install -e ".[dev]"`; this resolves dependencies from the
+version ranges in `pyproject.toml` rather than the lockfile.
 
 ## Configuration
 
@@ -43,8 +47,34 @@ Certificate pinning, mTLS, and universal HTTPS interception are not guaranteed w
 ## Tests
 
 ```bash
-pytest
+uv run --locked pytest
 ```
+
+CI runs the locked install, package build, and test suite on Python 3.11, 3.12,
+and 3.13.
+
+## Run in a container
+
+Docker Compose builds the image, starts the proxy and API, and persists captured
+data in a named volume:
+
+```bash
+docker compose up --build
+```
+
+The proxy is available at `127.0.0.1:8080` and the API docs at
+`http://127.0.0.1:8090/docs`. Capturing and replaying are disabled for all
+domains by default. Set the allowed domains explicitly before use, for example
+in PowerShell:
+
+```powershell
+$env:PROXY_AS_CODE_CAPTURE__INCLUDE_DOMAINS='["example.com"]'
+$env:PROXY_AS_CODE_REPLAY__ALLOWED_DOMAINS='["example.com"]'
+docker compose up --build
+```
+
+Replay approval remains required. Stop the container with `docker compose down`;
+the `proxy-data` volume is retained.
 
 ## AI agents (MCP)
 
