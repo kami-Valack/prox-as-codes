@@ -105,6 +105,23 @@ class TrafficRepository:
         ).fetchone()
         if row is None:
             return None
+        return self._record_from_row(row)
+
+    def list_transactions(
+        self, *, limit: int = 100, offset: int = 0
+    ) -> list[OriginalRecord]:
+        rows = self._conn.execute(
+            """
+            SELECT * FROM transactions
+            ORDER BY captured_at DESC
+            LIMIT ? OFFSET ?
+            """,
+            (limit, offset),
+        ).fetchall()
+        return [self._record_from_row(row) for row in rows]
+
+    @staticmethod
+    def _record_from_row(row: sqlite3.Row) -> OriginalRecord:
         return OriginalRecord(
             id=UUID(row["id"]),
             method=row["method"],

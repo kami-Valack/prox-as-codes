@@ -19,6 +19,7 @@ from proxy_as_code.api.schemas import (
     TransactionSummaryOut,
 )
 from proxy_as_code.app_context import AppContext
+from proxy_as_code.capture.models import OriginalRecord
 from proxy_as_code.replay.safety import ReplaySafetyError
 
 router = APIRouter(prefix="/v1")
@@ -72,11 +73,27 @@ def search_requests(
     ]
 
 
+@router.get("/requests", response_model=list[TransactionDetailOut])
+def list_requests(
+    limit: int = Query(100, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+    ctx: AppContext = Depends(get_context),
+):
+    records = ctx.repository.list_transactions(limit=limit, offset=offset)
+    return [_transaction_detail_out(ctx, record) for record in records]
+
+
 @router.get("/transactions/{transaction_id}", response_model=TransactionDetailOut)
 def get_transaction(transaction_id: UUID, ctx: AppContext = Depends(get_context)):
     record = ctx.repository.get_transaction(transaction_id)
     if record is None:
         raise HTTPException(status_code=404, detail="Transaction not found")
+    return _transaction_detail_out(ctx, record)
+
+
+def _transaction_detail_out(
+    ctx: AppContext, record: OriginalRecord
+) -> TransactionDetailOut:
     return TransactionDetailOut(
         transaction_id=record.id,
         method=record.method,
